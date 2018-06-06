@@ -37,7 +37,7 @@ exports.config = {
   // Phoenix paths configuration
   paths: {
     // Dependencies and current project directories to watch
-    watched: ["static", "css", "js", "vendor"],
+    watched: ["static", "css", "js", "vendor", "scss", "fonts"],
     // Where to compile files to
     public: "../priv/static"
   },
@@ -47,7 +47,19 @@ exports.config = {
     babel: {
       // Do not use ES6 compiler in vendor code
       ignore: [/vendor/]
-    }
+    },
+    sass: {
+      mode: 'native',
+      options: {
+        includePaths: ["node_modules/font-awesome/scss", "node_modules/bootstrap/scss", "node_modules/bootstrap-vue/dist"], // Tell sass-brunch where to look for files to @import
+        precision: 8 // Minimum precision required by bootstrap-sass
+       }
+     },
+     copycat: {
+       "fonts" : ["static/fonts", "node_modules/font-awesome/fonts"],
+       verbose : false, //shows each file that is copied to the destination directory
+       onlyChanged: true //only copy a file if it's modified time has changed (only effective when using brunch watch)
+     }
   },
 
   modules: {
