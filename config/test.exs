@@ -12,8 +12,8 @@ config :logger, level: :warn
 # Configure your database
 config :mattchat, Mattchat.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
+  username: "mhw",
+  password: "",
   database: "mattchat_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
