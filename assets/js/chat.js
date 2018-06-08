@@ -128,25 +128,20 @@ if (chatContainer) {
           let peer = this.createPeer(false, stream);
           
           peer.on('error', err => {
+            console.log('Error in peering', err);
             try {
-              peer.destroy()
               myVideo.removeAttribute("src");
-              // myVideo.load();
               callerVideo.removeAttribute("src");
-              // callerVideo.load();
               this.chatStatus = "User lost 😔 ";
             } catch(err) {
-              console.log('Error in peering', err);
+              // Ignore
             }
           })
 
           peer.on('close', () => {
             try {
-              peer.destroy()
               myVideo.removeAttribute("src");
-              // myVideo.load();
               callerVideo.removeAttribute("src");
-              // callerVideo.load();
             } catch(err) {
               // Ignore
             }
@@ -213,12 +208,8 @@ if (chatContainer) {
           peer.on('error', err => {
             try {
               console.log('Error in peering', err);
-              peer.destroy()
-              peer = null
               myVideo.removeAttribute("src");
-              // myVideo.load();
               callerVideo.removeAttribute("src");
-              // callerVideo.load();
               this.chatStatus = "User lost 😔 ";
             } catch(err) {
               // Ignore
@@ -227,12 +218,8 @@ if (chatContainer) {
 
           peer.on('close', () => {
             try {
-              peer.destroy()
-              peer = null
               myVideo.removeAttribute("src");
-              // myVideo.load();
               callerVideo.removeAttribute("src");
-              // callerVideo.load();
             } catch(err) {
               // Ignore
             }
