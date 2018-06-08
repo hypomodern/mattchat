@@ -159,7 +159,7 @@ if (chatContainer) {
 
           this.callChannel.on(`signal:from_${fromUsername}`, signal => {
             console.log(`got a signal from ${fromUsername}, sending it to peer: `, signal);
-            if(peer) {
+            if (peer && !peer.destroyed) {
               peer.signal(signal)
             }
           });
@@ -245,7 +245,7 @@ if (chatContainer) {
 
           this.callChannel.on(`signal:from_${username}`, signal => {
             console.log(`got a signal from ${username}, sending it to peer: `, signal);
-            if (peer) {
+            if (peer && !peer.destroyed) {
               peer.signal(signal);
             }
           });
