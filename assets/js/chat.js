@@ -131,9 +131,9 @@ if (chatContainer) {
             try {
               peer.destroy()
               myVideo.removeAttribute("src");
-              myVideo.load();
+              // myVideo.load();
               callerVideo.removeAttribute("src");
-              callerVideo.load();
+              // callerVideo.load();
               this.chatStatus = "User lost 😔 ";
             } catch(err) {
               console.log('Error in peering', err);
@@ -144,9 +144,9 @@ if (chatContainer) {
             try {
               peer.destroy()
               myVideo.removeAttribute("src");
-              myVideo.load();
+              // myVideo.load();
               callerVideo.removeAttribute("src");
-              callerVideo.load();
+              // callerVideo.load();
             } catch(err) {
               // Ignore
             }
@@ -201,6 +201,7 @@ if (chatContainer) {
           myVideo.play()
           
           const callerVideo = this.$refs.callerVideo;
+          let callerVideoPlayingPromise = null;
 
           this.stream = stream;
 
@@ -215,9 +216,9 @@ if (chatContainer) {
               peer.destroy()
               peer = null
               myVideo.removeAttribute("src");
-              myVideo.load();
+              // myVideo.load();
               callerVideo.removeAttribute("src");
-              callerVideo.load();
+              // callerVideo.load();
               this.chatStatus = "User lost 😔 ";
             } catch(err) {
               // Ignore
@@ -229,9 +230,9 @@ if (chatContainer) {
               peer.destroy()
               peer = null
               myVideo.removeAttribute("src");
-              myVideo.load();
+              // myVideo.load();
               callerVideo.removeAttribute("src");
-              callerVideo.load();
+              // callerVideo.load();
             } catch(err) {
               // Ignore
             }
@@ -254,7 +255,7 @@ if (chatContainer) {
             this.chatStatus = "Connected!";
             console.log("CONNECTED!");
           })
-
+          
           peer.on('stream', (callerStream) => {
             // got remote video stream, now let's show it in a video tag
             callerVideo.src = vendorURL ? vendorURL.createObjectURL(callerStream) : callerStream
