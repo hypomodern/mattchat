@@ -14,6 +14,9 @@
 import "phoenix_html"
 import "phoenix"
 
+import "jquery"
+import "bootstrap"
+
 // Import local files
 //
 // Local files can be imported directly using relative

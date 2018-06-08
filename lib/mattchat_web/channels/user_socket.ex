@@ -6,6 +6,7 @@ defmodule MattchatWeb.UserSocket do
 
   ## Channels
   channel "room:*", MattchatWeb.RoomChannel
+  channel "calls", MattchatWeb.CallChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket

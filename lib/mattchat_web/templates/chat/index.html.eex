@@ -1,10 +1,12 @@
 <div id="chat-container" 
      data-auth-token="<%= @auth_token %>"
      data-channel-name="global"
+     data-current-user="<%= @current_user.username %>"
      data-ws-url="<%= ws_url() %>">
   <div id="content">
     <div class="row">
-      <div class="col-2">
+      <div class="col-3">
+
         <div class="panel panel-default">
           <div class="panel-heading">Who's Here?</div>
           <div class="panel-body">
@@ -13,14 +15,22 @@
                 <li class="list-group-item" 
                     v-for="user in users"
                     v-bind:key="user.username">
-                  <span class="user-color" 
-                        v-bind:style="{background: user.color}"></span>
+                  <button id="call-button" 
+                          class="btn btn-light"
+                          v-bind:disabled="isCurrentUser(user.username)"
+                          v-on:click="startVideoCall(user.username)">
+                    <i class="fa fa-comment"></i>
+                  </button>
                   <span class="user-name">{{ user.username }}</span>
+                  <span v-if="isCurrentUser(user.username)">(you)</span>
                 </li>
               </transition>
             </ul>
           </div>
         </div>
+
+        <hr />
+
         <div class="panel panel-default">
           <div class="panel-heading">Channels</div>
           <div class="panel-body">
@@ -34,6 +44,7 @@
           </div>
         </div>
       </div>
+
       <div class="col">
         <div id="chat-window">
           <div class="panel panel-default">
@@ -65,6 +76,29 @@
                 </span>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="call-modal" tabindex="-1" role="dialog" ref="callModal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-title">{{ chatStatus }}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <video id="caller-video" ref="callerVideo"></video>
+          <video id="my-video" ref="myVideo"></video>
+
+          <p v-if="error">{{ error }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Hang up</button>
         </div>
       </div>
     </div>

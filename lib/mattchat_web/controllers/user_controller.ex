@@ -3,6 +3,7 @@ defmodule MattchatWeb.UserController do
 
   alias Mattchat.Accounts
   alias Mattchat.Accounts.User
+  alias Mattchat.Accounts.Guardian
 
   def index(conn, _params) do
     users = Accounts.list_users()
@@ -18,8 +19,10 @@ defmodule MattchatWeb.UserController do
     case Accounts.create_user(user_params) do
       {:ok, user} ->
         conn
-        |> put_flash(:info, "User created successfully.")
-        |> redirect(to: user_path(conn, :show, user))
+        |> put_flash(:info, "Welcome to Mattchat.")
+        |> Guardian.Plug.sign_in(user)
+        |> assign(:current_user, user)
+        |> redirect(to: chat_path(conn, :index))
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
