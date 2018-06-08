@@ -261,7 +261,6 @@ if (chatContainer) {
         // close out my video
         const myVideo = this.$refs.myVideo;
         myVideo.removeAttribute("src");
-        myVideo.load();
 
         // close old handler, if present
         if (this.$refs.callModal.dataset.signalChannel) {
