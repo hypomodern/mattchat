@@ -25,3 +25,4 @@ import "bootstrap"
 // import socket from "./socket"
 
 import './chat'
+import './chat_test'

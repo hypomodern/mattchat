@@ -33,6 +33,7 @@ defmodule MattchatWeb.Router do
     pipe_through [:browser, :auth, :ensure_auth]
 
     get "/chat", ChatController, :index
+    get "/chat_test", ChatController, :test
     delete "/logout", SessionController, :destroy
   end
 

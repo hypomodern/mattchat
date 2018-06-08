@@ -86,17 +86,22 @@ if (chatContainer) {
           initiator: initiator,
           trickle: true,
           stream: stream, 
-          offerConstraints: { 
-            offerToReceiveAudio: initiator, 
-            offerToReceiveVideo: initiator 
-          },
+          // offerConstraints: { 
+          //   offerToReceiveAudio: initiator, 
+          //   offerToReceiveVideo: initiator 
+          // },
           config: {
             iceServers: [
-              {urls:'stun:stun.l.google.com:19302'},
-              {urls:'stun:stun1.l.google.com:19302'},
-              {urls:'stun:stun2.l.google.com:19302'},
-              {urls:'stun:stun3.l.google.com:19302'},
-              {urls:'stun:stun4.l.google.com:19302'}
+              {
+                urls: "stun:numb.viagenie.ca",
+                username: "mhw@hypomodern.com",
+                credential: "tf02bls"
+              },
+              {
+                urls: "turn:numb.viagenie.ca",
+                username: "mhw@hypomodern.com",
+                credential: "tf02bls"
+              }
             ]
           }
         });

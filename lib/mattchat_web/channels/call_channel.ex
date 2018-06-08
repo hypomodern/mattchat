@@ -1,7 +1,7 @@
 defmodule MattchatWeb.CallChannel do
   use MattchatWeb, :channel
 
-  alias MattchatWeb.Presence
+  # alias MattchatWeb.Presence
 
   def join("calls", _params, socket) do
     {:ok, socket}

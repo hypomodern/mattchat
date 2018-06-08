@@ -8,4 +8,9 @@ defmodule MattchatWeb.ChatController do
     |> assign(:current_user, user)
     |> render "index.html"
   end
+
+  def test(conn, _params) do
+    conn
+    |> render "test.html"
+  end
 end

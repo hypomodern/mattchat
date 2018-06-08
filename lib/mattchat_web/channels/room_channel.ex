@@ -9,7 +9,7 @@ defmodule MattchatWeb.RoomChannel do
     {:ok, socket}
   end
 
-  def handle_info({:after_join, room_name}, socket) do
+  def handle_info({:after_join, _room_name}, socket) do
     push(socket, "presence_state", Presence.list(socket))
 
     {:ok, _} =
