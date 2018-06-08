@@ -1,8 +1,11 @@
 defmodule MattchatWeb.UserSocket do
   use Phoenix.Socket
 
+  alias Mattchat.Accounts
+  alias Mattchat.Accounts.Guardian
+
   ## Channels
-  # channel "room:*", MattchatWeb.RoomChannel
+  channel "room:*", MattchatWeb.RoomChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
@@ -19,9 +22,17 @@ defmodule MattchatWeb.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def connect(_params, socket) do
-    {:ok, socket}
+  def connect(%{"token" => token}, socket) do
+    case Guardian.decode_and_verify(token) do
+      {:ok, claims} ->
+        {:ok, user } = Guardian.resource_from_claims(claims)
+        {:ok, assign(socket, :current_user, user)}
+      {:error, _reason} ->
+        :error
+    end
   end
+
+  def connect(_params, _socket), do: :error
 
   # Socket id's are topics that allow you to identify all sockets for a given user:
   #

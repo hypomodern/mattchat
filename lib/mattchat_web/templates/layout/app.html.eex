@@ -14,17 +14,7 @@
   <body>
     <div class="container">
       <header class="header">
-        <nav role="navigation">
-          <ul class="nav nav-pills pull-right">
-            <li class="nav-item">
-              <a class="nav-link" href="http://www.phoenixframework.org/docs">
-                <i class="fa fa-pencil"></i>
-                Sign up!
-              </a>
-            </li>
-          </ul>
-        </nav>
-        <span class="logo"></span>
+        <h1 class="display-3">It's MattChat!</h1>
       </header>
 
       <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>

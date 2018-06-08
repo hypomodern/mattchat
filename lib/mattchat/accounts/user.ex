@@ -5,7 +5,7 @@ defmodule Mattchat.Accounts.User do
 
   schema "users" do
     field :email, :string
-    field :name, :string
+    field :username, :string
     field :password_hash, :string
     # Virtual fields for creation/modification workflow
     field :password, :string, virtual: true
@@ -18,12 +18,12 @@ defmodule Mattchat.Accounts.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:name, :email, :password, :password_confirmation])
-    |> validate_required([:name, :password, :password_confirmation])
+    |> cast(attrs, [:username, :email, :password, :password_confirmation])
+    |> validate_required([:username, :password, :password_confirmation])
     |> validate_length(:password, min: 3)
     |> validate_format(:email, ~r/@/)
     |> validate_confirmation(:password)
-    |> unique_constraint(:name)
+    |> unique_constraint(:username)
     |> unique_constraint(:email)
     |> put_password_hash
   end

@@ -13,11 +13,27 @@ defmodule MattchatWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :auth do
+    plug Mattchat.Accounts.Pipeline
+  end
+
+  pipeline :ensure_auth do
+    plug Guardian.Plug.EnsureAuthenticated, handler: SessionController
+  end
+
   scope "/", MattchatWeb do
-    pipe_through :browser # Use the default browser stack
+    pipe_through [:browser, :auth]
 
     get "/", PageController, :index
+    post "/login", SessionController, :create
     resources "/users", UserController, only: [:create]
+  end
+
+  scope "/", MattchatWeb do
+    pipe_through [:browser, :auth, :ensure_auth]
+
+    get "/chat", ChatController, :index
+    delete "/logout", SessionController, :destroy
   end
 
   # Other scopes may use custom stacks.

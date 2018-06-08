@@ -7,6 +7,9 @@ defmodule Mattchat.Accounts do
   alias Mattchat.Repo
 
   alias Mattchat.Accounts.User
+  
+  alias Mattchat.Accounts.Guardian
+  import Comeonin.Bcrypt, only: [checkpw: 2, dummy_checkpw: 0]
 
   @doc """
   Returns the list of users.
@@ -100,5 +103,27 @@ defmodule Mattchat.Accounts do
   """
   def change_user(%User{} = user) do
     User.changeset(user, %{})
+  end
+
+  def authenticate_user(username, given_password) do
+    query = from u in User, where: u.username == ^username
+    Repo.one(query)
+    |> check_password(given_password)
+  end
+
+  defp check_password(nil, _) do
+    dummy_checkpw()
+    {:error, "Incorrect username or password."}
+  end
+  defp check_password(user, given_password) do
+    case checkpw(given_password, user.password_hash) do
+      true -> {:ok, user}
+      false -> {:error, "Incorrect username or password."}
+    end
+  end
+
+  def access_token(user) do
+    {:ok, token, _claims } = Guardian.encode_and_sign(user)
+    token
   end
 end

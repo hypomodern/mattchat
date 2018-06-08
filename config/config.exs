@@ -22,6 +22,11 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:user_id]
 
+# Configures Guardian's Token Signing
+config :mattchat, Mattchat.Accounts.Guardian,
+  issuer: "mattchat",
+  secret_key: "wUlUb3WQA2M/g2HZeloWttPS2olDcOv9QYv7DpiReesKY9LC9FWYF90OwWZPGwZR"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"

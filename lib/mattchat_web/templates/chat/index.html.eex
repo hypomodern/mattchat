@@ -1,0 +1,74 @@
+<div id="chat-container" 
+     data-auth-token="<%= @auth_token %>"
+     data-channel-name="global"
+     data-ws-url="<%= ws_url() %>">
+  <div id="content">
+    <div class="row">
+      <div class="col-2">
+        <div class="panel panel-default">
+          <div class="panel-heading">Who's Here?</div>
+          <div class="panel-body">
+            <ul id="users" class="list-group">
+              <transition-group name="user-appear">
+                <li class="list-group-item" 
+                    v-for="user in users"
+                    v-bind:key="user.username">
+                  <span class="user-color" 
+                        v-bind:style="{background: user.color}"></span>
+                  <span class="user-name">{{ user.username }}</span>
+                </li>
+              </transition>
+            </ul>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading">Channels</div>
+          <div class="panel-body">
+            <ul id="channels" ref="channels" class="list-group">
+              <li class="list-group-item"
+                  v-for="(channel, index) in channels"
+                  v-bind:key="index">
+                <span class="channel-name">#{{ channel.name }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div id="chat-window">
+          <div class="panel panel-default">
+            <div class="panel-heading">What's Up?</div>
+            <div class="panel-body">
+              <ul id="messages" ref="messages" class="list-group">
+                <li class="list-group-item"
+                    v-for="(message, index) in messages"
+                    v-bind:key="index">
+                  <span class="chat-message-name">{{ message.username }}:</span>
+                  <span class="chat-message-body">{{ message.body }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <form id="chat-form" v-on:submit.prevent="sendChat">
+            <div class="input-group">
+              <input id="chat-input"
+                      type="text"
+                      class="form-control"
+                      v-model="chatMessage">
+                <span class="input-group-btn">
+                  <button id="chat-button" 
+                          class="btn btn-primary"
+                          v-bind:disabled="!chatMessage"
+                          v-on:click="sendChat">
+                    <i class="fa fa-comment"></i>
+                  </button>
+                </span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p><%= link "Let me out!", to: session_path(@conn, :destroy), method: :delete %>
