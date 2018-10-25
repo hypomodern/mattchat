@@ -129,7 +129,6 @@ if (chatContainer) {
       hangUpCall() {
         this.callChannel.push(`hangup:${this.callMeta.callee}`);
         this.callChannel.push(`hangup:${this.callMeta.caller}`);
-        this.closeAgoraChannel();
         this.resetCallMeta();
       },
       resetCallMeta() {
@@ -187,35 +186,6 @@ if (chatContainer) {
           }, function (err) {
             console.log("getUserMedia failed", err);
           });
-
-          _client.on('stream-published', function (evt) {
-            console.log("Published local stream successfully");
-          });
-
-          _client.on('stream-added', function (evt) {
-            const stream = evt.stream;
-            console.log("New stream added: " + stream.getId());
-
-            _client.subscribe(stream, function (err) {
-              console.log("Subscribe stream failed", err);
-            });
-          });
-
-          _client.on('stream-subscribed', (evt) => {
-            const remoteStream = evt.stream;
-            this.remoteStream = remoteStream;
-            console.log("Subscribe remote stream successfully: " + remoteStream.getId());
-            remoteStream.play('caller-video');
-            this.callStatus = `Connected to ${this.isCallee ? this.callMeta.caller : this.callMeta.callee}`;
-            $('#caller-video video').css('position', '');
-          });
-
-          _client.on('peer-leave', function (evt) {
-            const stream = evt.stream;
-            if (stream) {
-              console.log(evt.uid + " left this channel");
-            }
-          });
         }, function(err) {
           console.log("Join channel failed", err);
         });
@@ -230,6 +200,10 @@ if (chatContainer) {
       endVideoCall() {
         $('#my-video > *').remove();
         $('#caller-video > *').remove();
+        $('#caller-video').removeClass('active');
+        this.closeAgoraChannel();
+        this.remoteStream = null;
+        this.localStream = null;
       }
     },
     mounted() {
@@ -249,6 +223,36 @@ if (chatContainer) {
       client.init("fb3385d52aac4c9c878c944c7e52c073", () => {
         console.log("AgoraRTC client initialized");
         this.rtcClient = client;
+
+        client.on('stream-published', function (evt) {
+          console.log("Published local stream successfully");
+        });
+
+        client.on('stream-added', function (evt) {
+          const stream = evt.stream;
+          console.log("New stream added: " + stream.getId());
+
+          client.subscribe(stream, function (err) {
+            console.log("Subscribe stream failed", err);
+          });
+        });
+
+        client.on('stream-subscribed', (evt) => {
+          const remoteStream = evt.stream;
+          this.remoteStream = remoteStream;
+          console.log("Subscribe remote stream successfully: " + remoteStream.getId());
+          remoteStream.play('caller-video');
+          this.callStatus = `Connected to ${this.isCallee ? this.callMeta.caller : this.callMeta.callee}`;
+          $('#caller-video video').css('position', '');
+          $('#caller-video').addClass('active');
+        });
+
+        client.on('peer-leave', function (evt) {
+          const stream = evt.stream;
+          if (stream) {
+            console.log(evt.uid + " left this channel");
+          }
+        });
       }, (err) => {
         console.log("AgoraRTC client init failed", err);
       });
