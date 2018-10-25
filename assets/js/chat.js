@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import { Socket, Presence } from "phoenix"
-import Peer from "simple-peer"
-import getUserMedia from "getusermedia"
+import AgoraRTC from "agora-rtc-sdk";
 
 const chatContainer = document.querySelector("#chat-container")
 
@@ -16,7 +15,8 @@ if (chatContainer) {
       chatMessage: "",
       error: "",
       currentUser: null,
-      chatStatus: ""
+      chatStatus: "",
+      rtcClient: null,
     },
     methods: {
       sendChat(event) {
@@ -33,8 +33,6 @@ if (chatContainer) {
 
           this.chatStatus = `incoming call from ${call.caller}...`;
           $(this.$refs.callModal).modal('show');
-
-          this.acceptVideoCall(call.caller);
         })
 
         this.callChannel.join()
@@ -48,7 +46,7 @@ if (chatContainer) {
       },
       joinChatChannel(channelName) {
         this.chatChannel = this.socket.channel(`room:${channelName}`, {})
-        
+
         this.presences = {}
 
         this.chatChannel.on('presence_state', state => {
@@ -81,199 +79,9 @@ if (chatContainer) {
 
         return Presence.list(presences, listBy)
       },
-      createPeer(initiator, stream) {
-        return new Peer({
-          initiator: initiator,
-          trickle: true,
-          stream: stream, 
-          // offerConstraints: { 
-          //   offerToReceiveAudio: initiator, 
-          //   offerToReceiveVideo: initiator 
-          // },
-          config: {
-            iceServers: [
-              {
-                urls: "stun:numb.viagenie.ca",
-                username: "mhw@hypomodern.com",
-                credential: "tf02bls"
-              },
-              {
-                urls: "turn:numb.viagenie.ca",
-                username: "mhw@hypomodern.com",
-                credential: "tf02bls"
-              }
-            ]
-          }
-        });
-      },
-      acceptVideoCall(fromUsername) {
-        getUserMedia({video: true, audio: true}, (err, stream) => {
-          if(err) {
-            console.log(err);
-            this.error = "There was a problem with your Webcam/Microphone. Please check your settings and try again.";
-            this.chatStatus = "The call failed!";
-            return;
-          }
-
-          let vendorURL = window.URL || window.webkitURL;
-          const myVideo = this.$refs.myVideo;
-          myVideo.src = vendorURL ? vendorURL.createObjectURL(stream) : stream;
-          myVideo.muted = true
-          myVideo.play()
-          
-          const callerVideo = this.$refs.callerVideo;
-
-          this.stream = stream;
-
-          let peer = this.createPeer(false, stream);
-          
-          peer.on('error', err => {
-            console.log('Error in peering', err);
-            try {
-              myVideo.removeAttribute("src");
-              callerVideo.removeAttribute("src");
-              this.chatStatus = "User lost 😔 ";
-            } catch(err) {
-              // Ignore
-            }
-          })
-
-          peer.on('close', () => {
-            try {
-              myVideo.removeAttribute("src");
-              callerVideo.removeAttribute("src");
-            } catch(err) {
-              // Ignore
-            }
-          })
-
-          peer.on(`signal`, signal => {
-            console.log('Peer got signal, pushing to channel: ', signal);
-            this.callChannel.push(`signal`, signal)
-          });
-
-          this.callChannel.on(`signal:from_${fromUsername}`, signal => {
-            console.log(`got a signal from ${fromUsername}, sending it to peer: `, signal);
-            if (peer && !peer.destroyed) {
-              peer.signal(signal)
-            }
-          });
-          this.$refs.callModal.dataset.signalChannel = `signal:${fromUsername}`
-          
-          peer.on('connect', () => {
-            this.chatStatus = "Connected!";
-            console.log("CONNECTED!");
-          })
-
-          peer.on('stream', (callerStream) => {
-            // got remote video stream, now let's show it in a video tag
-            callerVideo.src = vendorURL ? vendorURL.createObjectURL(callerStream) : callerStream
-            callerVideo.play()
-            this.chatStatus = `Now streaming live with ${fromUsername}`;
-          })
-          /* end getUserMedia callback */
-        });
-      },
-      startVideoCall(username) {
-        this.error = "";
-        const $modal = $('#call-modal');
-        $modal.modal('show');
-
-        this.chatStatus = `calling ${username} now...`;
-
-        getUserMedia({video: true, audio: true}, (err, stream) => {
-          if(err) {
-            console.log(err);
-            this.error = "There was a problem with your Webcam/Microphone. Please check your settings and try again.";
-            this.chatStatus = "The call failed!";
-            return;
-          }
-
-          let vendorURL = window.URL || window.webkitURL;
-          const myVideo = this.$refs.myVideo;
-          myVideo.src = vendorURL ? vendorURL.createObjectURL(stream) : stream;
-          myVideo.muted = true
-          myVideo.play()
-          
-          const callerVideo = this.$refs.callerVideo;
-          let callerVideoPlayingPromise = null;
-
-          this.stream = stream;
-
-          // TODO: actually agree to things and handshake!
-          this.callChannel.push(`initiate_call:${username}`, {});
-
-          let peer = this.createPeer(true, stream);
-
-          peer.on('error', err => {
-            try {
-              console.log('Error in peering', err);
-              myVideo.removeAttribute("src");
-              callerVideo.removeAttribute("src");
-              this.chatStatus = "User lost 😔 ";
-            } catch(err) {
-              // Ignore
-            }
-          })
-
-          peer.on('close', () => {
-            try {
-              myVideo.removeAttribute("src");
-              callerVideo.removeAttribute("src");
-            } catch(err) {
-              // Ignore
-            }
-          })
-
-          peer.on(`signal`, signal => {
-            console.log('Peer got signal, pushing to channel: ', signal);
-            this.callChannel.push(`signal`, signal)
-          });
-
-          this.callChannel.on(`signal:from_${username}`, signal => {
-            console.log(`got a signal from ${username}, sending it to peer: `, signal);
-            if (peer && !peer.destroyed) {
-              peer.signal(signal);
-            }
-          });
-          this.$refs.callModal.dataset.signalChannel = `signal:${username}`
-          
-          peer.on('connect', () => {
-            this.chatStatus = "Connected!";
-            console.log("CONNECTED!");
-          })
-          
-          peer.on('stream', (callerStream) => {
-            // got remote video stream, now let's show it in a video tag
-            callerVideo.src = vendorURL ? vendorURL.createObjectURL(callerStream) : callerStream
-            callerVideo.play()
-            this.chatStatus = `Now streaming live with ${username}`;
-          })
-          /* end getUserMedia callback */
-        });
-      },
       isCurrentUser(username) {
         return username == this.currentUser;
       },
-      endVideoCall() {
-        console.log("Hanging up call...")
-        
-        // close out my video
-        const myVideo = this.$refs.myVideo;
-        myVideo.removeAttribute("src");
-
-        // close old handler, if present
-        if (this.$refs.callModal.dataset.signalChannel) {
-          this.callChannel.off(this.$refs.callModal.dataset.signalChannel)
-        }
-
-        if (this.stream) {
-          this.stream.getTracks().forEach( (track) => {
-            track.stop();
-          });
-          this.stream = null;
-        }
-      }
     },
     mounted() {
       const { authToken, channelName, currentUser } = this.$el.dataset
@@ -286,8 +94,17 @@ if (chatContainer) {
       this.socket = new Socket("/socket", { params: { token: authToken } })
       this.socket.connect()
 
+      const client = AgoraRTC.createClient({mode: 'live', codec: "h264"});
+
+      // TODO: extract appID to configuration
+      client.init("fb3385d52aac4c9c878c944c7e52c073", () => {
+        console.log("AgoraRTC client initialized");
+        this.rtcClient = client;
+      }, (err) => {
+        console.log("AgoraRTC client init failed", err);
+      });
+
       this.joinChatChannel(channelName)
-      this.joinCallChannel()
     },
     watch: {
       messages(newValue, oldValue) {
