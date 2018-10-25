@@ -3,6 +3,28 @@
 @import "bootstrap-vue";
 @import 'font-awesome';
 
-body {
-  font-size: 1rem;
+/* Space out content a bit */
+body, form, ul, table {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* Phoenix flash messages */
+.alert:empty { display: none; }
+
+/* my stuff */
+#my-video {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  bottom: 10px;
+  right: 10px;
+  padding: 0;
+  margin: 0;
+}
+
+#caller-video {
+  min-width: 480px;
+  min-height: 320px;
+  width: 100%;
 }
