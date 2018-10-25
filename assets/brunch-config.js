@@ -51,12 +51,12 @@ exports.config = {
     sass: {
       mode: 'native',
       options: {
-        includePaths: ["node_modules/font-awesome/scss", "node_modules/bootstrap/scss", "node_modules/bootstrap-vue/dist"], // Tell sass-brunch where to look for files to @import
+        includePaths: ["node_modules/@fortawesome/fontawesome-free/scss", "node_modules/bootstrap/scss", "node_modules/bootstrap-vue/dist"], // Tell sass-brunch where to look for files to @import
         precision: 8 // Minimum precision required by bootstrap-sass
        }
      },
      copycat: {
-       "fonts" : ["static/fonts", "node_modules/font-awesome/fonts"],
+       "fonts" : ["static/fonts", "node_modules/@fortawesome/fontawesome-free/webfonts"],
        verbose : false, //shows each file that is copied to the destination directory
        onlyChanged: true //only copy a file if it's modified time has changed (only effective when using brunch watch)
      }

@@ -20,7 +20,7 @@
                           class="btn btn-light"
                           v-bind:disabled="isCurrentUser(user.username)"
                           v-on:click="startVideoCall(user.username)">
-                    <i class="fa fa-comment"></i>
+                    <i class="fas fa-comment"></i>
                   </button>
                   <span class="user-name">{{ user.username }}</span>
                   <span v-if="isCurrentUser(user.username)">(you)</span>
@@ -72,7 +72,7 @@
                           class="btn btn-primary"
                           v-bind:disabled="!chatMessage"
                           v-on:click="sendChat">
-                    <i class="fa fa-comment"></i>
+                    <i class="fas fa-comment"></i>
                   </button>
                 </span>
             </div>
@@ -84,7 +84,7 @@
 
   <!-- Modal -->
   <div class="modal fade" id="call-modal" tabindex="-1" role="dialog" ref="callModal">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="modal-title">{{ callStatus }}</h5>
@@ -99,8 +99,14 @@
           <p v-if="error">{{ error }}</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" v-if="isCallee && !callJoined" v-on:click="acceptCall">Accept</button>
-          <button type="button" class="btn btn-secondary" v-on:click="hangUpCall" data-dismiss="modal">Hang up</button>
+          <button type="button" class="btn btn-primary" v-if="isCallee && !callJoined" v-on:click="acceptCall">
+            <i class="fas fa-phone"></i>
+            Accept
+          </button>
+          <button type="button" class="btn btn-secondary" v-on:click="hangUpCall" data-dismiss="modal">
+            <i class="fas fa-phone-slash"></i>
+            Hang up
+          </button>
         </div>
       </div>
     </div>
