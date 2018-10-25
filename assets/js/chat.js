@@ -217,7 +217,7 @@ if (chatContainer) {
       this.socket = new Socket("/socket", { params: { token: authToken } })
       this.socket.connect()
 
-      const client = AgoraRTC.createClient({mode: 'live', codec: "h264"});
+      const client = AgoraRTC.createClient({mode: 'live'});
 
       // TODO: extract appID to configuration
       client.init("fb3385d52aac4c9c878c944c7e52c073", () => {
