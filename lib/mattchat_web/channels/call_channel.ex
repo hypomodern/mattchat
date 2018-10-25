@@ -15,6 +15,30 @@ defmodule MattchatWeb.CallChannel do
     {:noreply, socket}
   end
 
+  def handle_in("hangup:" <> on_username, _params, socket) do
+    broadcast!(socket, "hangup:" <> on_username, %{
+      caller: current_user(socket).username
+    })
+
+    {:noreply, socket}
+  end
+
+  def handle_in("accept_call:" <> from_username, _params, socket) do
+    broadcast!(socket, "call_accepted:" <> from_username, %{
+      callee: current_user(socket).username
+    })
+
+    {:noreply, socket}
+  end
+
+  def handle_in("busy:" <> to_username, _params, socket) do
+    broadcast!(socket, "busy:" <> to_username, %{
+      user: current_user(socket).username
+    })
+
+    {:noreply, socket}
+  end
+
   def handle_in("signal", payload, socket) do
     broadcast socket, "signal:from_#{current_user(socket).username}", payload
     {:noreply, socket}

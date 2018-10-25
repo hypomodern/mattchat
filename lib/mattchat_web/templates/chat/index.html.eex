@@ -1,7 +1,8 @@
-<div id="chat-container" 
+<div id="chat-container"
      data-auth-token="<%= @auth_token %>"
      data-channel-name="global"
      data-current-user="<%= @current_user.username %>"
+     data-current-uid="<%= @current_user.id %>"
      data-ws-url="<%= ws_url() %>">
   <div id="content">
     <div class="row">
@@ -12,10 +13,10 @@
           <div class="panel-body">
             <ul id="users" class="list-group">
               <transition-group name="user-appear">
-                <li class="list-group-item" 
+                <li class="list-group-item"
                     v-for="user in users"
                     v-bind:key="user.username">
-                  <button id="call-button" 
+                  <button id="call-button"
                           class="btn btn-light"
                           v-bind:disabled="isCurrentUser(user.username)"
                           v-on:click="startVideoCall(user.username)">
@@ -67,7 +68,7 @@
                       class="form-control"
                       v-model="chatMessage">
                 <span class="input-group-btn">
-                  <button id="chat-button" 
+                  <button id="chat-button"
                           class="btn btn-primary"
                           v-bind:disabled="!chatMessage"
                           v-on:click="sendChat">
@@ -86,19 +87,20 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="modal-title">{{ chatStatus }}</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <h5 class="modal-title" id="modal-title">{{ callStatus }}</h5>
+          <button type="button" class="close" v-on:click="hangUpCall" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <video id="caller-video" ref="callerVideo"></video>
-          <video id="my-video" ref="myVideo"></video>
+          <div id="caller-video"></div>
+          <div id="my-video"></div>
 
           <p v-if="error">{{ error }}</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Hang up</button>
+          <button type="button" class="btn btn-primary" v-if="isCallee && !callJoined" v-on:click="acceptCall">Accept</button>
+          <button type="button" class="btn btn-secondary" v-on:click="hangUpCall" data-dismiss="modal">Hang up</button>
         </div>
       </div>
     </div>
