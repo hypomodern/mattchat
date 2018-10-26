@@ -7,7 +7,12 @@ defmodule MattchatWeb.Schema.ChatTypes do
     field :id, :id
     field :body, :string
     field :user_id, :string
+    field :user, :user
     field :inserted_at, :date
+  end
+
+  object :user do
+    field :username, :string
   end
 
   input_object :chat_input do
