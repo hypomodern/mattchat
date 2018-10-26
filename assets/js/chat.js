@@ -141,6 +141,7 @@ if (chatContainer) {
           caller: null,
           callee: null,
         }
+        this.muteAudio = false;
         this.leaveRoomIfJoined();
         if (this.localStream) {
           this.detachTracks([this.localStream]);
