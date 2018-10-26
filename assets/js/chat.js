@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import { Socket, Presence } from "phoenix"
-import AgoraRTC from "agora-rtc-sdk";
+import Twilio, { connect, createlocalStreams, createLocalVideoTrack } from 'twilio-video';
 import axios from 'axios';
 
 const chatContainer = document.querySelector("#chat-container")
@@ -18,9 +18,9 @@ if (chatContainer) {
       error: "",
       currentUser: null,
       callStatus: "",
-      rtcClient: null,
+      twToken: null,
       localStream: null,
-      remoteStream: null,
+      remoteStreams: [],
       callMeta: {
         inCall: false,
         callJoined: false,
@@ -78,9 +78,8 @@ if (chatContainer) {
           console.log(`call_accepted:${this.currentUser}`, call)
 
           this.callStatus = `connecting you to ${call.callee}...`;
-          // TODO: connect over agora
 
-          this.setupAgoraChannel();
+          this.setupCall();
         });
 
         this.callChannel.join()
@@ -131,7 +130,6 @@ if (chatContainer) {
       hangUpCall() {
         this.callChannel.push(`hangup:${this.callMeta.callee}`);
         this.callChannel.push(`hangup:${this.callMeta.caller}`);
-        this.resetCallMeta();
       },
       resetCallMeta() {
         this.callMeta = {
@@ -140,17 +138,21 @@ if (chatContainer) {
           caller: null,
           callee: null,
         }
-        if (this.localStream) this.localStream.close();
-        if (this.remoteStream) this.remoteStream.close();
+        this.leaveRoomIfJoined();
+        if (this.localStream) {
+          this.localStream = null;
+        }
+        if (this.remoteStreams.length > 0) {
+          this.remoteStreams = [];
+        }
       },
       acceptCall() {
         console.log("Accepting call...");
         this.callMeta.callJoined = true;
         this.callChannel.push(`accept_call:${this.callMeta.caller}`);
         this.callStatus = `connecting you to ${this.callMeta.caller}...`;
-        // TODO: connect over agora
 
-        this.setupAgoraChannel();
+        this.setupCall();
       },
       toUsers(presences) {
         const listBy = (username, { metas: [first, ...rest] }) => {
@@ -162,108 +164,128 @@ if (chatContainer) {
       isCurrentUser(username) {
         return username == this.currentUser;
       },
-      agoraChannelName() {
+      videoChannelName() {
         return `call:${this.callMeta.caller}:${this.callMeta.callee}`;
       },
-      setupAgoraChannel() {
-        // TODO: secure channels with server-generated authtoken
-        const _client = this.rtcClient;
-        this.rtcClient.join(null, this.agoraChannelName(), null, (uid) => {
-          console.log("User " + uid + " joined channel successfully");
-          const localStream = AgoraRTC.createStream({
-            streamID: uid,
+
+      // Attach the Tracks to the DOM.
+      attachTracks(tracks, container) {
+        tracks.forEach(function(track) {
+          container.appendChild(track.attach());
+        });
+      },
+
+      // Attach the Participant's Tracks to the DOM.
+      attachParticipantTracks(participant, container) {
+        let tracks = Array.from(participant.tracks.values());
+        this.remoteStreams = tracks;
+        this.attachTracks(tracks, container);
+      },
+
+      // Detach the Tracks from the DOM.
+      detachTracks(tracks) {
+        tracks.forEach( (track) => {
+          track.detach().forEach((detachedElement) => {
+            console.log(`removing ${detachedElement}`)
+            detachedElement.remove();
+          });
+        });
+      },
+
+      // Detach the Participant's Tracks from the DOM.
+      detachParticipantTracks(participant) {
+        let tracks = Array.from(participant.tracks.values());
+        this.detachTracks(tracks);
+      },
+
+      // Leave Room.
+      leaveRoomIfJoined() {
+        console.log("Leaving room", this.activeRoom)
+        if (this.localStream) this.localStream.stop();
+        if (this.activeRoom) this.activeRoom.disconnect();
+      },
+
+      getAccessToken(room_name) {
+        return Promise.resolve(this.twToken);
+      },
+
+      // Create a new chat
+      setupCall() {
+        const VueThis = this;
+        const room_name = this.videoChannelName()
+
+        this.getAccessToken(room_name).then( (data) => {
+          const token = VueThis.twToken;
+          let connectOptions = {
+            name: room_name,
+            // logLevel: 'debug',
             audio: true,
-            video: true,
-            screen: false
-          });
+            video: { width: 640 }
+          };
+          // before a user enters a new room,
+          // disconnect the user from they joined already
+          this.leaveRoomIfJoined();
 
-          this.localStream = localStream;
-          localStream.init(function() {
-            console.log("getUserMedia success");
-            localStream.play('my-video');
+          // remove any remote track when joining a new room
+          document.getElementById('caller-video').innerHTML = "";
 
-            _client.publish(localStream, function (err) {
-              console.log("Publish local stream error: " + err);
+          Twilio.connect(token, connectOptions).then(function(room) {
+            console.log('Successfully joined a Room: ', room);
+            VueThis.activeRoom = room;
+
+            // Attach the Tracks of all the remote Participants.
+            // room.participants.forEach(function(participant) {
+            //   let previewContainer = document.getElementById('caller-video');
+            //   VueThis.attachParticipantTracks(participant, previewContainer);
+            // });
+
+            // When a Participant joins the Room, log the event.
+            room.on('participantConnected', function(participant) {
+              console.log("Joining: '" + participant.identity + "'");
             });
-          }, function (err) {
-            console.log("getUserMedia failed", err);
+
+            // When a Participant adds a Track, attach it to the DOM.
+            room.on('trackSubscribed', function(track, participant) {
+              console.log(participant.identity + " added track: " + track.kind);
+              let callerVideoContainer = document.getElementById('caller-video');
+              VueThis.attachTracks([track], callerVideoContainer);
+            });
+
+            // When a Participant removes a Track, detach it from the DOM.
+            room.on('trackUnsubscribed', function(track, participant) {
+              console.log(participant.identity + " removed track: " + track.kind);
+              VueThis.detachTracks([track]);
+            });
+
+            // When a Participant leaves the Room, detach its Tracks.
+            room.on('participantDisconnected', function(participant) {
+              console.log("Participant '" + participant.identity + "' left the room");
+              VueThis.detachParticipantTracks(participant);
+            });
+
+            // if local preview is not active, create it
+            if(!VueThis.localStream) {
+              createLocalVideoTrack({'logLevel':'debug'}).then(track => {
+                let localMediaContainer = document.getElementById('my-video');
+                VueThis.attachTracks([track], localMediaContainer);
+                VueThis.localStream = track;
+              });
+            }
           });
-        }, function(err) {
-          console.log("Join channel failed", err);
         });
-      },
-      closeAgoraChannel() {
-        this.rtcClient.leave(function() {
-          console.log("we left the channel");
-        }, function(err) {
-          console.log("client leave failed ", err);
-        });
-      },
-      endVideoCall() {
-        $('#my-video > *').remove();
-        $('#caller-video > *').remove();
-        $('#caller-video').removeClass('active');
-        this.localStream.stop();
-        this.closeAgoraChannel();
-        this.remoteStream = null;
-        this.localStream = null;
       },
     },
     mounted() {
-      const { authToken, channelName, currentUser } = this.$el.dataset
+      const { authToken, channelName, currentUser, _uid, _ws, twToken } = this.$el.dataset
 
-      this.currentUser = currentUser
+      this.currentUser = currentUser;
+      this.twToken = twToken;
 
       // TODO: look into bootstrap-vue to get real vue components
       $(this.$refs.callModal).on("hide.bs.modal", this.endVideoCall)
 
       this.socket = new Socket("/socket", { params: { token: authToken } })
       this.socket.connect()
-
-      const client = AgoraRTC.createClient({mode: 'live'});
-
-      // TODO: extract appID to configuration
-      client.init("fb3385d52aac4c9c878c944c7e52c073", () => {
-        console.log("AgoraRTC client initialized");
-        this.rtcClient = client;
-
-        client.on('stream-published', function (evt) {
-          console.log("Published local stream successfully");
-        });
-
-        client.on('stream-added', function (evt) {
-          const stream = evt.stream;
-          console.log("New stream added: " + stream.getId());
-
-          client.subscribe(stream, function (err) {
-            console.log("Subscribe stream failed", err);
-          });
-        });
-
-        client.on('stream-subscribed', (evt) => {
-          const remoteStream = evt.stream;
-          this.remoteStream = remoteStream;
-          console.log("Subscribe remote stream successfully: " + remoteStream.getId());
-          remoteStream.play('caller-video');
-          this.callStatus = `Connected to ${this.isCallee ? this.callMeta.caller : this.callMeta.callee}`;
-          $('#caller-video video').css('position', '');
-          $('#caller-video').addClass('active');
-        });
-
-        client.on('stream-removed', (evt) => {
-          if (this.remoteStream) this.remoteStream.stop();
-          console.log("Remote stream is removed " + remoteStream.getId());
-        });
-
-        client.on('peer-leave', function (evt) {
-          const stream = evt.stream;
-          if (stream) {
-            console.log(evt.uid + " left this channel");
-          }
-        });
-      }, (err) => {
-        console.log("AgoraRTC client init failed", err);
-      });
 
       this.joinChatChannel(channelName)
       this.joinCallChannel()

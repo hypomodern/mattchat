@@ -6,7 +6,7 @@ defmodule MattchatWeb.Resolvers.Chat do
   end
 
   def create_chat(_, %{input: params}, _) do
-    case ChatService.create_item(params) do
+    case ChatService.create_chat(params) do
       {:error, changeset} ->
         {:ok, %{errors: transform_errors(changeset)}}
       {:ok, chat} ->

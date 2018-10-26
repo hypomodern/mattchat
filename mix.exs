@@ -20,9 +20,13 @@ defmodule Mattchat.Mixfile do
   def application do
     [
       mod: {Mattchat.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: app_list(Mix.env)
     ]
   end
+
+  defp app_list(:dev), do: [:dotenv | app_list]
+  defp app_list(_), do: app_list
+  defp app_list(), do: [:logger, :runtime_tools]
 
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
@@ -48,6 +52,8 @@ defmodule Mattchat.Mixfile do
       {:absinthe_plug, "~> 1.4.0"},
       {:absinthe_phoenix, "~> 1.4.0"},
       {:absinthe_relay, "~> 1.4.0"},
+      {:dotenv, "~> 3.0.0"},
+      {:joken, "~> 1.5.0"}
     ]
   end
 

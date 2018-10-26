@@ -15,7 +15,12 @@ config :mattchat, MattchatWeb.Endpoint,
   secret_key_base: "mimidAsidRZ6bKPNv/ZqqughRjkga79Vj2nTxdsq/F9jaJtTiVgq9xI0fX3DfxLW",
   render_errors: [view: MattchatWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Mattchat.PubSub,
-           adapter: Phoenix.PubSub.PG2]
+           adapter: Phoenix.PubSub.PG2],
+  # Twilio Config
+  tw_account_sid: {:system, "TWILIO_ACCOUNT_SID"},
+  tw_auth_token: {:system, "TWILIO_AUTH_TOKEN"},
+  tw_api_key: {:system, "TWILIO_API_KEY"}
+
 
 # Configures Elixir's Logger
 config :logger, :console,

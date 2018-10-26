@@ -3,7 +3,8 @@
      data-channel-name="global"
      data-current-user="<%= @current_user.username %>"
      data-current-uid="<%= @current_user.id %>"
-     data-ws-url="<%= ws_url() %>">
+     data-ws-url="<%= ws_url() %>"
+     data-tw-token="<%= @tw_token %>">
   <div id="content">
     <div class="row">
       <div class="col-3">
