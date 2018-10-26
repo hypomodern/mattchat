@@ -10,6 +10,7 @@ defmodule Mattchat.Accounts.User do
     # Virtual fields for creation/modification workflow
     field :password, :string, virtual: true
     field :password_confirmation, :string, virtual: true
+    has_many :chats, Mattchat.Chat
 
 
     timestamps()
@@ -37,5 +38,5 @@ defmodule Mattchat.Accounts.User do
           changeset
     end
   end
-  
+
 end

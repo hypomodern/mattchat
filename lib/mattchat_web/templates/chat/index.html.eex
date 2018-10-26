@@ -52,6 +52,12 @@
             <div class="panel-heading">What's Up?</div>
             <div class="panel-body">
               <ul id="messages" ref="messages" class="list-group">
+                <%= for message <- @messages do %>
+                  <li class="list-group-item">
+                    <span class="chat-message-name"><%= message.user.username %>:</span>
+                    <span class="chat-message-body"><%= message.body %></span>
+                  </li>
+                <% end %>
                 <li class="list-group-item"
                     v-for="(message, index) in messages"
                     v-bind:key="index">

@@ -43,7 +43,11 @@ defmodule Mattchat.Mixfile do
       {:cowboy, "~> 1.0"},
       {:guardian, "~> 1.0"},
       {:comeonin, "~> 4.1"},
-      {:bcrypt_elixir, "~> 1.0"}
+      {:bcrypt_elixir, "~> 1.0"},
+      {:absinthe, "~> 1.4.2"},
+      {:absinthe_plug, "~> 1.4.0"},
+      {:absinthe_phoenix, "~> 1.4.0"},
+      {:absinthe_relay, "~> 1.4.0"},
     ]
   end
 

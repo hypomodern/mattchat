@@ -37,6 +37,17 @@ defmodule MattchatWeb.Router do
     delete "/logout", SessionController, :destroy
   end
 
+  scope "/" do
+    pipe_through :api
+
+    forward "/api", Absinthe.Plug,
+      schema: MattchatWeb.Schema
+
+    forward "/graphiql", Absinthe.Plug.GraphiQL,
+      schema: MattchatWeb.Schema,
+      interface: :simple
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", MattchatWeb do
   #   pipe_through :api

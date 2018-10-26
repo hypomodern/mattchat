@@ -2,6 +2,7 @@ defmodule MattchatWeb.RoomChannel do
   use MattchatWeb, :channel
 
   alias MattchatWeb.Presence
+  alias Mattchat.ChatService
 
   def join("room:" <> room_name, _params, socket) do
     # TODO: eventually provide the last 20 messages or w/e
@@ -20,7 +21,13 @@ defmodule MattchatWeb.RoomChannel do
     {:noreply, socket}
   end
 
-  def handle_in("new_chat_message", %{"body" => body}, socket) do
+  def handle_in("new_chat_message", %{"body" => body, "channel" => channel}, socket) do
+    {:ok, chat} = ChatService.create_chat(%{
+      body: body,
+      channel: channel,
+      user_id: current_user(socket).id
+    })
+
     broadcast!(socket, "new_chat_message", %{
       username: current_user(socket).username,
       body: body
