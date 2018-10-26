@@ -140,6 +140,7 @@ if (chatContainer) {
         }
         this.leaveRoomIfJoined();
         if (this.localStream) {
+          this.detachTracks([this.localStream]);
           this.localStream = null;
         }
         if (this.remoteStreams.length > 0) {
