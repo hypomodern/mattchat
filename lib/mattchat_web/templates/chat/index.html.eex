@@ -19,9 +19,12 @@
                     v-bind:key="user.username">
                   <button id="call-button"
                           class="btn btn-light"
-                          v-bind:disabled="isCurrentUser(user.username)"
+                          v-bind:disabled="isCurrentUser(user.username) || user.inCall"
                           v-on:click="startVideoCall(user.username)">
-                    <i class="fas fa-comment"></i>
+                    <i
+                      v-bind:class="{ 'fa-comment': !user.inCall, 'fa-clock': user.inCall }"
+                      class="fas"
+                    ></i>
                   </button>
                   <span class="user-name">{{ user.username }}</span>
                   <span v-if="isCurrentUser(user.username)">(you)</span>

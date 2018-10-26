@@ -15,7 +15,8 @@ defmodule MattchatWeb.RoomChannel do
 
     {:ok, _} =
       Presence.track(socket, current_user(socket).username, %{
-        online_at: inspect(System.system_time(:seconds))
+        online_at: inspect(System.system_time(:seconds)),
+        in_call: false
       })
 
     {:noreply, socket}
@@ -31,6 +32,24 @@ defmodule MattchatWeb.RoomChannel do
     broadcast!(socket, "new_chat_message", %{
       username: current_user(socket).username,
       body: body
+    })
+
+    {:noreply, socket}
+  end
+
+  def handle_in("started_call", _params, socket) do
+    {:ok, _} = Presence.update(socket, current_user(socket).username, %{
+      in_call: true,
+      online_at: inspect(System.system_time(:seconds))
+    })
+
+    {:noreply, socket}
+  end
+
+  def handle_in("ended_call", _params, socket) do
+    {:ok, _} = Presence.update(socket, current_user(socket).username, %{
+      in_call: false,
+      online_at: inspect(System.system_time(:seconds))
     })
 
     {:noreply, socket}

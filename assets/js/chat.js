@@ -121,6 +121,7 @@ if (chatContainer) {
       },
       startVideoCall(username) {
         this.callChannel.push(`initiate_call:${username}`);
+        this.chatChannel.push('started_call');
         this.callStatus = `calling ${username}...`;
         this.callMeta.inCall = true;
         this.callMeta.caller = this.currentUser;
@@ -146,6 +147,7 @@ if (chatContainer) {
         if (this.remoteStreams.length > 0) {
           this.remoteStreams = [];
         }
+        this.chatChannel.push('ended_call');
       },
       acceptCall() {
         console.log("Accepting call...");
@@ -153,11 +155,13 @@ if (chatContainer) {
         this.callChannel.push(`accept_call:${this.callMeta.caller}`);
         this.callStatus = `connecting you to ${this.callMeta.caller}...`;
 
+        this.chatChannel.push('started_call');
+
         this.setupCall();
       },
       toUsers(presences) {
         const listBy = (username, { metas: [first, ...rest] }) => {
-          return { username: username }
+          return { username: username, inCall: first.in_call }
         }
 
         return Presence.list(presences, listBy)
@@ -266,12 +270,17 @@ if (chatContainer) {
 
             // if local preview is not active, create it
             if(!VueThis.localStream) {
-              createLocalVideoTrack({'logLevel':'debug'}).then(track => {
+              const options = {
+                // 'logLevel': 'debug'
+              };
+              createLocalVideoTrack(options).then(track => {
                 let localMediaContainer = document.getElementById('my-video');
                 VueThis.attachTracks([track], localMediaContainer);
                 VueThis.localStream = track;
               });
             }
+
+            VueThis.callStatus = `Connected to ${VueThis.isCallee ? VueThis.callMeta.caller : VueThis.callMeta.callee}`;
           });
         });
       },
