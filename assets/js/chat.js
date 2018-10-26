@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import { Socket, Presence } from "phoenix"
 import AgoraRTC from "agora-rtc-sdk";
+import axios from 'axios';
 
 const chatContainer = document.querySelector("#chat-container")
 
@@ -10,6 +11,7 @@ if (chatContainer) {
     el: '#chat-container',
     data: {
       channels: [{name: 'global'}],
+      currentChannel: 'global',
       messages: [],
       users: [],
       chatMessage: "",
@@ -37,7 +39,7 @@ if (chatContainer) {
     methods: {
       sendChat(event) {
         if (this.chatMessage) {
-          this.chatChannel.push("new_chat_message", { body: this.chatMessage })
+          this.chatChannel.push("new_chat_message", { body: this.chatMessage, channel: this.currentChannel })
           this.chatMessage = ""
         }
       },
@@ -201,10 +203,11 @@ if (chatContainer) {
         $('#my-video > *').remove();
         $('#caller-video > *').remove();
         $('#caller-video').removeClass('active');
+        this.localStream.stop();
         this.closeAgoraChannel();
         this.remoteStream = null;
         this.localStream = null;
-      }
+      },
     },
     mounted() {
       const { authToken, channelName, currentUser } = this.$el.dataset
@@ -245,6 +248,11 @@ if (chatContainer) {
           this.callStatus = `Connected to ${this.isCallee ? this.callMeta.caller : this.callMeta.callee}`;
           $('#caller-video video').css('position', '');
           $('#caller-video').addClass('active');
+        });
+
+        client.on('stream-removed', (evt) => {
+          if (this.remoteStream) this.remoteStream.stop();
+          console.log("Remote stream is removed " + remoteStream.getId());
         });
 
         client.on('peer-leave', function (evt) {
