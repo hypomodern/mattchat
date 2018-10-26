@@ -33,7 +33,7 @@ defmodule MattchatWeb.Schema do
   scalar :date do
     parse fn input ->
       with %Absinthe.Blueprint.Input.String{value: value} <- input,
-      {:ok, date} <- Date.from_iso8601(value) do
+      {:ok, date} <- NaiveDateTime.from_iso8601(value) do
         {:ok, date}
       else
         _ -> :error
@@ -41,7 +41,7 @@ defmodule MattchatWeb.Schema do
     end
 
     serialize fn date ->
-      Date.to_iso8601(date)
+      NaiveDateTime.to_iso8601(date)
     end
   end
 
