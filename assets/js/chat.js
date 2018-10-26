@@ -21,6 +21,7 @@ if (chatContainer) {
       twToken: null,
       localStream: null,
       remoteStreams: [],
+      muteAudio: false,
       callMeta: {
         inCall: false,
         callJoined: false,
@@ -78,6 +79,7 @@ if (chatContainer) {
           console.log(`call_accepted:${this.currentUser}`, call)
 
           this.callStatus = `connecting you to ${call.callee}...`;
+          this.callMeta.callJoined = true;
 
           this.setupCall();
         });
@@ -89,7 +91,7 @@ if (chatContainer) {
           .receive("error", response => {
             this.error = `Joining calls failed 🙁`
             console.log(this.error, response)
-          })
+          });
       },
       joinChatChannel(channelName) {
         this.chatChannel = this.socket.channel(`room:${channelName}`, {})
@@ -171,6 +173,13 @@ if (chatContainer) {
       },
       videoChannelName() {
         return `call:${this.callMeta.caller}:${this.callMeta.callee}`;
+      },
+      toggleAudio() {
+        this.muteAudio = !this.muteAudio;
+        const localParticipant = this.activeRoom.localParticipant;
+        localParticipant.audioTracks.forEach((audioTrack) => {
+          this.muteAudio ? audioTrack.disable() : audioTrack.enable();
+        });
       },
 
       // Attach the Tracks to the DOM.

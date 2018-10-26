@@ -113,6 +113,10 @@
             <i class="fas fa-phone"></i>
             Accept
           </button>
+          <button type="button" class="btn btn-secondary" v-if="callJoined" v-on:click="toggleAudio">
+            <i v-bind:class="{'fa-microphone': !muteAudio, 'fa-microphone-slash': muteAudio}" class="fas"></i>
+            {{ muteAudio ? 'Unmute' : 'Mute' }}
+          </button>
           <button type="button" class="btn btn-secondary" v-on:click="hangUpCall" data-dismiss="modal">
             <i class="fas fa-phone-slash"></i>
             Hang up
