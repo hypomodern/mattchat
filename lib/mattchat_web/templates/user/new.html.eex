@@ -1,4 +1,4 @@
 <h2>Signup</h2>
 
-<%= render "form.html", Map.put(assigns, :action, user_path(@conn, :create)) %>
+<%= render "form.html", Map.put(assigns, :action, Routes.user_path(@conn, :create)) %>
 

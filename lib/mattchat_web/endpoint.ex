@@ -1,7 +1,7 @@
 defmodule MattchatWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :mattchat
 
-  socket "/socket", MattchatWeb.UserSocket
+  socket "/socket", MattchatWeb.UserSocket, websocket: [timeout: 45_000]
 
   # Serve at "/" the static files from "priv/static" directory.
   #
@@ -24,7 +24,7 @@ defmodule MattchatWeb.Endpoint do
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
-    json_decoder: Poison
+    json_decoder: Jason
 
   plug Plug.MethodOverride
   plug Plug.Head

@@ -1,5 +1,7 @@
 defmodule Mattchat.Repo do
-  use Ecto.Repo, otp_app: :mattchat
+  use Ecto.Repo,
+    otp_app: :mattchat,
+    adapter: Ecto.Adapters.Postgres
 
   @doc """
   Dynamically loads the repository url from the

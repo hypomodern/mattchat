@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import { Socket, Presence } from "phoenix"
 import Twilio, { connect, createlocalStreams, createLocalVideoTrack } from 'twilio-video';
-import axios from 'axios';
 
 const chatContainer = document.querySelector("#chat-container")
 

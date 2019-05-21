@@ -1,9 +1,8 @@
 /* This file is for your main application css. */
-$fa-font-path: "../fonts";
-@import "bootstrap";
-@import "bootstrap-vue";
-@import "fontawesome";
-@import "solid";
+$fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
+@import "~bootstrap/scss/bootstrap";
+@import "~@fortawesome/fontawesome-free/scss/fontawesome";
+@import "~@fortawesome/fontawesome-free/scss/solid";
 
 /* Space out content a bit */
 body, form, ul, table {

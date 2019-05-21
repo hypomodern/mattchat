@@ -21,7 +21,7 @@ defmodule MattchatWeb do
     quote do
       use Phoenix.Controller, namespace: MattchatWeb
       import Plug.Conn
-      import MattchatWeb.Router.Helpers
+      alias MattchatWeb.Router.Helpers, as: Routes
       import MattchatWeb.Gettext
     end
   end
@@ -37,7 +37,7 @@ defmodule MattchatWeb do
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
 
-      import MattchatWeb.Router.Helpers
+      alias MattchatWeb.Router.Helpers, as: Routes
       import MattchatWeb.ErrorHelpers
       import MattchatWeb.Gettext
     end

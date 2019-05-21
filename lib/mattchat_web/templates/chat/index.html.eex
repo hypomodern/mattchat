@@ -127,4 +127,4 @@
   </div>
 </div>
 
-<p><%= link "Let me out!", to: session_path(@conn, :destroy), method: :delete %>
+<p><%= link "Let me out!", to: Routes.session_path(@conn, :destroy), method: :delete %>

@@ -11,12 +11,12 @@ defmodule MattchatWeb.SessionController do
         conn
         |> login(user)
         |> put_flash(:info, "Welcome back!")
-        |> redirect(to: chat_path(conn, :index))
-  
+        |> redirect(to: Routes.chat_path(conn, :index))
+
       {:error, reason} ->
         conn
         |> put_flash(:error, reason)
-        |> redirect(to: page_path(conn, :index))
+        |> redirect(to: Routes.page_path(conn, :index))
     end
   end
 
@@ -24,7 +24,7 @@ defmodule MattchatWeb.SessionController do
     conn
     |> logout()
     |> put_flash(:info, "Goodbye!")
-    |> redirect(to: page_path(conn, :index))
+    |> redirect(to: Routes.page_path(conn, :index))
   end
 
   defp login(conn, user) do
@@ -41,6 +41,6 @@ defmodule MattchatWeb.SessionController do
   defp unauthenticated(conn, _params) do
     conn
     |> put_flash(:error, "Unauthenticated!")
-    |> redirect(to: page_path(conn, :index))
+    |> redirect(to: Routes.page_path(conn, :index))
   end
 end
