@@ -25,9 +25,4 @@ defmodule MattchatWeb.ChatController do
     |> assign(:tw_token, tw_token)
     |> render "index.html"
   end
-
-  def test(conn, _params) do
-    conn
-    |> render("test.html")
-  end
 end
