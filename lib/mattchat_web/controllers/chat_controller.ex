@@ -7,6 +7,7 @@ defmodule MattchatWeb.ChatController do
   require Logger
 
   def index(conn, _params) do
+    channels = ChatService.channels()
     messages = ChatService.messages(%{
       order: :asc,
       limit: 20,
@@ -20,12 +21,13 @@ defmodule MattchatWeb.ChatController do
     |> assign(:auth_token, Mattchat.Accounts.access_token(user))
     |> assign(:current_user, user)
     |> assign(:messages, messages)
+    |> assign(:channels, channels)
     |> assign(:tw_token, tw_token)
     |> render "index.html"
   end
 
   def test(conn, _params) do
     conn
-    |> render "test.html"
+    |> render("test.html")
   end
 end

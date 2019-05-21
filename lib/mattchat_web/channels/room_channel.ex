@@ -25,7 +25,7 @@ defmodule MattchatWeb.RoomChannel do
   def handle_in("new_chat_message", %{"body" => body, "channel" => channel}, socket) do
     {:ok, chat} = ChatService.create_chat(%{
       body: body,
-      channel: channel,
+      channel_name: channel,
       user_id: current_user(socket).id
     })
 

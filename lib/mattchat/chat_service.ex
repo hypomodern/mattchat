@@ -7,6 +7,11 @@ defmodule Mattchat.ChatService do
   alias Mattchat.Repo
 
   alias Mattchat.Chat
+  alias Mattchat.Channel
+
+  def channels() do
+    Repo.all(Channel)
+  end
 
   # These should probably be in a separate layer, but I'm just jamming 'em here for now.
   def messages(args) do
@@ -32,7 +37,7 @@ defmodule Mattchat.ChatService do
   defp filter_with(query, filter) do
     Enum.reduce(filter, query, fn
       {:channel, channel}, query ->
-        from q in query, where: q.channel == ^channel
+        from q in query, where: q.channel_name == ^channel
       {:sent_before, date}, query ->
         from q in query, where: q.inserted_at <= ^date
     end)
