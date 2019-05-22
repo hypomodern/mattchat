@@ -4,6 +4,7 @@
       <presences
         :users="users"
         :currentUser="currentUser"
+        @start-video-call="startCall"
       />
 
       <hr>
@@ -35,6 +36,18 @@
         :socket="socket"
       />
     </div>
+
+    <call
+      v-show="shouldShowCall"
+      @hang-up-call="closeCall"
+      @accept-call="acceptCall"
+      :currentUser="currentUser"
+      :twToken="twToken"
+      :caller="caller"
+      :callee="callee"
+      :callStatus="callStatus"
+      :callJoined="callJoined"
+    />
   </div>
 </template>
 
@@ -42,10 +55,11 @@
   import Presences from '@/app/presences';
   import ChannelList from '@/app/channelList';
   import Channel from '@/app/channel';
+  import Call from '@/app/call';
   import storage from '@/../localStorage';
+  // import EventBus from '@/../eventBus';
 
   import { Socket, Presence } from "phoenix";
-  // import Twilio, { connect, createlocalStreams, createLocalVideoTrack } from 'twilio-video';
 
   export default {
     name: 'ChatApp',
@@ -53,6 +67,7 @@
       Presences,
       ChannelList,
       Channel,
+      Call,
     },
     data() {
       return {
@@ -62,10 +77,19 @@
         presences: {},
         socket: {},
         error: null,
-        selectedChannel: this.getSelectedChannel()
+        selectedChannel: this.getSelectedChannel(),
+        inCall: false,
+        twToken: null,
+        caller: "",
+        callee: "",
+        callStatus: "",
+        callJoined: false,
       };
     },
     computed: {
+      shouldShowCall() {
+        return this.inCall;
+      },
     },
     mounted() {
       const userEl = document.getElementById('userData');
@@ -82,8 +106,11 @@
       this.socket.connect();
 
       this.joinMattchat();
-      // this.joinCallChannel()
+      this.joinCallChannel()
     },
+    // beforeDestroy() {
+    //   EventBus.bus.$off('hang-up-call');
+    // },
     methods: {
       clearError() {
         this.error = null;
@@ -130,6 +157,80 @@
             console.log(this.error, response)
           });
       },
+      joinCallChannel() {
+        this.callChannel = this.socket.channel(`calls`, {});
+
+        this.callChannel.on(`calling:${this.currentUser}`, call => {
+          console.log('Got a call!', call);
+          if (this.inCall) {
+            console.log('Ignoring it because we are already on a call');
+            this.callChannel.push(`busy:${call.caller}`);
+            return;
+          }
+
+          this.resetCallMeta();
+          this.callStatus = `incoming call from ${call.caller}...`;
+          this.caller = call.caller;
+          this.callee = this.currentUser;
+          this.inCall = true;
+        });
+
+        this.callChannel.on(`hangup:${this.currentUser}`, call => {
+          console.log('Hangup!', call);
+          this.inCall = false;
+          this.endCall();
+        });
+
+        this.callChannel.on(`busy:${this.currentUser}`, call => {
+          console.log('They were busy!');
+          this.callStatus = `${this.callee} is already in a call, sorry!`
+        });
+
+        this.callChannel.on(`call_accepted:${this.currentUser}`, call => {
+          console.log(`call_accepted:${this.currentUser}`, call);
+
+          this.callStatus = `connecting you to ${call.callee}...`;
+          this.callJoined = true;
+        });
+
+        this.callChannel.join()
+          .receive("ok", response => {
+            console.log(`Joined calls 📞`)
+          })
+          .receive("error", response => {
+            this.error = `Joining calls failed 🙁`
+            console.log(this.error, response)
+          });
+      },
+      startCall(withUser) {
+        this.callStatus = `calling ${withUser}...`;
+        this.caller = this.currentUser;
+        this.callee = withUser;
+        this.inCall = true;
+        this.callChannel.push(`initiate_call:${withUser}`);
+        this.appChannel.push('started_call');
+      },
+      closeCall() {
+        this.callChannel.push(`hangup:${this.callee}`);
+        this.callChannel.push(`hangup:${this.caller}`);
+        this.inCall = false;
+      },
+      resetCallMeta() {
+        this.callStatus = "";
+        this.caller = "";
+        this.callee = "";
+        this.callJoined = false;
+      },
+      endCall() {
+        this.appChannel.push('ended_call');
+      },
+      acceptCall() {
+        this.callJoined = true;
+        this.callChannel.push(`accept_call:${this.caller}`);
+        this.callStatus = `connecting you to ${this.caller}...`;
+
+        this.appChannel.push('started_call');
+      }
     },
   }
 </script>

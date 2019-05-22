@@ -36,7 +36,7 @@
         return username === this.currentUser;
       },
       startVideoCall(withUser) {
-        console.log(`Calling ${withUser}`);
+        this.$emit('start-video-call', withUser);
       }
     }
   }
