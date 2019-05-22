@@ -164,8 +164,9 @@
           // disconnect the user from they joined already
           this.leaveRoomIfJoined();
 
-          // remove any remote track when joining a new room
+          // remove any video refs when joining a new room
           this.$refs.callerVideo.innerHTML = "";
+          this.$refs.myVideo.innerHTML = "";
 
           Twilio.connect(token, connectOptions).then((room) => {
             console.log('Successfully joined a Room: ', room);
@@ -209,7 +210,6 @@
               createLocalVideoTrack(options).then(track => {
                 console.log(this);
                 let localMediaContainer = this.$refs.myVideo;
-                console.log(localMediaContainer);
                 this.attachTracks([track], localMediaContainer);
                 this.localStream = track;
               });
