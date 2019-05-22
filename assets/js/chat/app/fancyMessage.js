@@ -1,13 +1,19 @@
-import { Emoji } from 'emoji-mart-vue-fast';
+import { Emoji, EmojiIndex } from 'emoji-mart-vue-fast';
+import data from "emoji-mart-vue-fast/data/all.json";
+let index = new EmojiIndex(data);
 
 const EMOJI_REGEX = /\B:[^\s]+:/g;
 
 function renderEmoji(h, emoji) {
-  console.log(emoji)
-  return h(Emoji, {
-    attrs: { title: emoji },
-    props: { emoji, size: 20 }
-  });
+  let theEmoji = index.findEmoji(emoji);
+  let rendered = emoji;
+  if (theEmoji) {
+    rendered = h(Emoji, {
+      attrs: { title: emoji },
+      props: { emoji, size: 20 }
+    });
+  }
+  return rendered;
 }
 
 function renderEmojis(h, val) {
