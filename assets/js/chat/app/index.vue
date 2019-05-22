@@ -61,6 +61,8 @@
 
   import { Socket, Presence } from "phoenix";
 
+  import 'emoji-mart-vue-fast/css/emoji-mart.css';
+
   export default {
     name: 'ChatApp',
     components: {
