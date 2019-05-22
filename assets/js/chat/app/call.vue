@@ -87,6 +87,15 @@
     },
     methods: {
       hangUpCall() {
+        this.leaveRoomIfJoined();
+        if (this.localStream) {
+          this.detachTracks([this.localStream]);
+          this.localStream = null;
+        }
+        if (this.remoteStreams.length > 0) {
+          this.remoteStreams = [];
+        }
+        this.muteAudio = false;
         this.$emit('hang-up-call');
       },
       acceptCall() {

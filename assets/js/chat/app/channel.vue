@@ -54,7 +54,7 @@
       },
       channelName() {
         this.joinChat();
-      }
+      },
     },
     mounted() {
       this.joinChat();
@@ -81,6 +81,7 @@
 
         this.chatChannel.on(`new_chat_message:${this.channelName}`, message => {
           this.messages.push(message);
+          this.messages = this.messages.slice(-20);
         });
 
         this.chatChannel.onClose(() => { console.log(`👋`)});
