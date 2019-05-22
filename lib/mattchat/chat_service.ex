@@ -34,6 +34,12 @@ defmodule Mattchat.ChatService do
     |> Repo.insert()
   end
 
+  def create_channel(attrs \\ %{}) do
+    %Channel{}
+    |> Channel.changeset(attrs)
+    |> Repo.insert()
+  end
+
   defp filter_with(query, filter) do
     Enum.reduce(filter, query, fn
       {:channel, channel}, query ->

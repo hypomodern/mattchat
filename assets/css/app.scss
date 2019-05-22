@@ -4,12 +4,6 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
 @import "~@fortawesome/fontawesome-free/scss/fontawesome";
 @import "~@fortawesome/fontawesome-free/scss/solid";
 
-/* Space out content a bit */
-body, form, ul, table {
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
 /* Phoenix flash messages */
 .alert:empty { display: none; }
 

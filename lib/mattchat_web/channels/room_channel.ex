@@ -1,25 +1,20 @@
 defmodule MattchatWeb.RoomChannel do
   use MattchatWeb, :channel
 
-  alias MattchatWeb.Presence
+  # alias MattchatWeb.Presence
   alias Mattchat.ChatService
 
   def join("room:" <> room_name, _params, socket) do
-    # TODO: eventually provide the last 20 messages or w/e
-    send(self(), {:after_join, room_name})
-    {:ok, socket}
-  end
+    messages = ChatService.messages(%{
+      order: :asc,
+      limit: 20,
+      filter: %{
+        channel: room_name
+      }
+    })
+    messages = Enum.map(messages, fn message -> %{ username: message.user.username, body: message.body } end)
 
-  def handle_info({:after_join, _room_name}, socket) do
-    push(socket, "presence_state", Presence.list(socket))
-
-    {:ok, _} =
-      Presence.track(socket, current_user(socket).username, %{
-        online_at: inspect(System.system_time(:seconds)),
-        in_call: false
-      })
-
-    {:noreply, socket}
+    {:ok, messages, socket}
   end
 
   def handle_in("new_chat_message", %{"body" => body, "channel" => channel}, socket) do
@@ -30,26 +25,12 @@ defmodule MattchatWeb.RoomChannel do
     })
 
     broadcast!(socket, "new_chat_message", %{
+      channel_name: channel
+    })
+
+    broadcast!(socket, "new_chat_message:" <> channel, %{
       username: current_user(socket).username,
       body: body
-    })
-
-    {:noreply, socket}
-  end
-
-  def handle_in("started_call", _params, socket) do
-    {:ok, _} = Presence.update(socket, current_user(socket).username, %{
-      in_call: true,
-      online_at: inspect(System.system_time(:seconds))
-    })
-
-    {:noreply, socket}
-  end
-
-  def handle_in("ended_call", _params, socket) do
-    {:ok, _} = Presence.update(socket, current_user(socket).username, %{
-      in_call: false,
-      online_at: inspect(System.system_time(:seconds))
     })
 
     {:noreply, socket}

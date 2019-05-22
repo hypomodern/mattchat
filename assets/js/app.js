@@ -7,8 +7,8 @@ import css from '../css/app.scss';
 import "phoenix_html"
 import "phoenix"
 
-import "jquery"
-import "bootstrap"
+// import "jquery"
+// import "bootstrap"
 
 // Import local files
 //
@@ -17,4 +17,4 @@ import "bootstrap"
 
 // import socket from "./socket"
 
-import './chat'
+// import './chat'

@@ -10,4 +10,4 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-Mattchat.Repo.insert!(%Mattchat.Channel{name: "global"})
+Mattchat.Repo.insert!(%Mattchat.Channel{name: "general"})

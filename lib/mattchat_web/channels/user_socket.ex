@@ -4,6 +4,7 @@ defmodule MattchatWeb.UserSocket do
   alias Mattchat.Accounts.Guardian
 
   ## Channels
+  channel "mattchat", MattchatWeb.ChatChannel
   channel "room:*", MattchatWeb.RoomChannel
   channel "calls", MattchatWeb.CallChannel
 

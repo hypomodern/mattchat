@@ -15,6 +15,7 @@ defmodule Mattchat.Channel do
     channel
     |> cast(attrs, [:name])
     |> validate_required([:name])
+    |> unique_constraint(:name, name: :channels_pkey)
   end
 
 end
